@@ -33,10 +33,10 @@ function Court() {
             <div className="p-place left"></div>
             <div className="p-place right"></div>
           </div>
-          <div className="right-modal-container">
-            <Stats />
-          </div>
         </Modal.Body>
+        <div className="right-modal-container mb-3">
+          <Stats />
+        </div>
         <Modal.Footer>
           <Button variant="secondary" onClick={handleCloseModalInsight}>
             Close
