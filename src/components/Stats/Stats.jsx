@@ -1,6 +1,6 @@
 import { Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
-import { Button, Card } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 import { generalDefensiveRate, playerFakeData } from "../../constants";
 
 function Stats() {

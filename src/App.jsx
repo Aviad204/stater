@@ -1,6 +1,6 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import "antd/dist/antd.css";
+import 'antd/dist/antd.min.css';
 
 import { ChakraProvider } from "@chakra-ui/react";
 
@@ -9,8 +9,6 @@ import CsvParser from "./components/csv-parser/CsvParser";
 
 import { AppContext } from "./context/context";
 import { useState } from "react";
-import ChartDisplay from "./components/ChartDisplay/ChartDisplay";
-import Court from "./components/Court/Court";
 
 function App() {
   const [playersStats, setPlayersStats] = useState(null);
@@ -24,6 +22,7 @@ function App() {
     e.preventDefault();
     setShowModalInsight((pre) => !pre);
   };
+
   // Handeling Table Modal
   const [showModalTable, setShowModalTable] = useState(false);
   const handleCloseModalTable = (e) => {
@@ -57,7 +56,6 @@ function App() {
     handleShowModalGraph,
     showModalGraph,
   };
-
 
   return (
     <ChakraProvider>

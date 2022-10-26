@@ -1,5 +1,5 @@
 import { Radio, RadioGroup, Select, Stack } from "@chakra-ui/react";
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import ReactApexChart from "react-apexcharts";
 import { Button, Modal } from "react-bootstrap";
 import { fieldsNameForPassing, fieldsNameForTouching } from "../../constants";
@@ -20,6 +20,7 @@ function ChartDisplay(props) {
   const [currentSelection, setCurrentSelection] = useState(
     graphMode === "Touching" ? "Min" : "Total"
   );
+
   // Handeling unchartable fields
   const excludedFields = new Set();
   excludedFields.add("Athlete");
@@ -35,136 +36,141 @@ function ChartDisplay(props) {
     if (event === "Passing") setCurrentSelection("Total");
   };
 
+  const chartGenerator = useCallback(
+    (nameArray) => {
+      const dataSet = [];
+      let playersData;
+      if (graphMode === "Touching") {
+        playersData = dataGeneratorForTouching(playersStats);
+      }
+      if (graphMode === "Passing") {
+        playersData = dataGeneratorForPassing(playersStats);
+      }
+      playersData.forEach((player) => dataSet.push(player[currentSelection]));
+
+      const avg = getAvg(dataSet);
+
+      setSeries([
+        {
+          name: currentSelection,
+          data: dataSet.map((value) => {
+            if (value.includes("-")) {
+              return value.split("-")[1];
+            } else return value;
+          }),
+        },
+      ]);
+      setOptions({
+        chart: {
+          height: 350,
+          type: "Column",
+        },
+        plotOptions: {
+          bar: {
+            borderRadius: 10,
+            dataLabels: {
+              position: "bottom",
+            },
+          },
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function (val) {
+            return val;
+          },
+          offsetY: -20,
+          style: {
+            fontSize: "12px",
+            colors: ["#304758"],
+          },
+        },
+        annotations: {
+          yaxis: [
+            {
+              y: avg,
+              borderColor: "#00E396",
+              label: {
+                borderColor: "#00E396",
+                style: {
+                  color: "#fff",
+                  background: "#00E396",
+                },
+                text: "Avg. of " + avg,
+              },
+            },
+          ],
+        },
+
+        xaxis: {
+          categories: nameArray,
+          position: "bottom",
+          axisBorder: {
+            show: false,
+          },
+          axisTicks: {
+            show: false,
+          },
+          crosshairs: {
+            fill: {
+              type: "gradient",
+              gradient: {
+                colorFrom: "#D8E3F0",
+                colorTo: "#BED1E6",
+                stops: [0, 100],
+                opacityFrom: 0.4,
+                opacityTo: 0.5,
+              },
+            },
+          },
+          tooltip: {
+            enabled: true,
+          },
+        },
+        yaxis: {
+          show: true,
+          axisTicks: {
+            show: true,
+            borderType: "solid",
+            color: "#78909C",
+            width: 6,
+            offsetX: 0,
+            offsetY: 0,
+          },
+        },
+        title: {
+          text: currentSelection
+            ? `Presenting information for ${currentSelection}`
+            : `Please choose a field from the list`,
+          floating: true,
+          offsetY: 330,
+          align: "center",
+          style: {
+            color: "#444",
+          },
+        },
+      });
+    }, [currentSelection, graphMode, playersStats]
+  );
+
+  const getPlayersName = useCallback(
+    (playersStats) => {
+      let nameArray = [];
+      const playersData = dataGeneratorForTouching(playersStats);
+      playersData.forEach((player) => nameArray.push(player.Athlete));
+
+      chartGenerator(nameArray);
+      setPlayersName(nameArray);
+    },
+    [chartGenerator]
+  );
+
   useEffect(() => {
     const unsub = () => {
-      const chartGenerator = (nameArray) => {
-        const dataSet = [];
-        let playersData;
-        if (graphMode === "Touching") {
-          playersData = dataGeneratorForTouching(playersStats);
-        }
-        if (graphMode === "Passing") {
-          playersData = dataGeneratorForPassing(playersStats);
-        }
-        playersData.forEach((player) => dataSet.push(player[currentSelection]));
-
-        const avg = getAvg(dataSet);
-
-        setSeries([
-          {
-            name: currentSelection,
-            data: dataSet.map((value) => {
-              if (value.includes("-")) {
-                return value.split("-")[1];
-              } else return value;
-            }),
-          },
-        ]);
-        setOptions({
-          chart: {
-            height: 350,
-            type: "Column",
-          },
-          plotOptions: {
-            bar: {
-              borderRadius: 10,
-              dataLabels: {
-                position: "bottom",
-              },
-            },
-          },
-          dataLabels: {
-            enabled: true,
-            formatter: function (val) {
-              return val;
-            },
-            offsetY: -20,
-            style: {
-              fontSize: "12px",
-              colors: ["#304758"],
-            },
-          },
-          annotations: {
-            yaxis: [
-              {
-                y: avg,
-                borderColor: "#00E396",
-                label: {
-                  borderColor: "#00E396",
-                  style: {
-                    color: "#fff",
-                    background: "#00E396",
-                  },
-                  text: "Avg. of " + avg,
-                },
-              },
-            ],
-          },
-
-          xaxis: {
-            categories: nameArray,
-            position: "bottom",
-            axisBorder: {
-              show: false,
-            },
-            axisTicks: {
-              show: false,
-            },
-            crosshairs: {
-              fill: {
-                type: "gradient",
-                gradient: {
-                  colorFrom: "#D8E3F0",
-                  colorTo: "#BED1E6",
-                  stops: [0, 100],
-                  opacityFrom: 0.4,
-                  opacityTo: 0.5,
-                },
-              },
-            },
-            tooltip: {
-              enabled: true,
-            },
-          },
-          yaxis: {
-            show: true,
-            axisTicks: {
-              show: true,
-              borderType: "solid",
-              color: "#78909C",
-              width: 6,
-              offsetX: 0,
-              offsetY: 0,
-            },
-          },
-          title: {
-            text: currentSelection
-              ? `Presenting information for ${currentSelection}`
-              : `Please choose a field from the list`,
-            floating: true,
-            offsetY: 330,
-            align: "center",
-            style: {
-              color: "#444",
-            },
-          },
-        });
-      };
-
-      const getPlayersName = (playersStats) => {
-        let nameArray = [];
-        const playersData = dataGeneratorForTouching(playersStats);
-        playersData.forEach((player) => nameArray.push(player.Athlete));
-
-        chartGenerator(nameArray);
-        setPlayersName(nameArray);
-      };
-
       if (playersStats) getPlayersName(playersStats);
     };
     unsub();
     return unsub();
-  }, [playersStats, currentSelection, graphMode]);
+  }, [playersStats, currentSelection, graphMode, chartGenerator, getPlayersName]);
 
   return (
     <Modal

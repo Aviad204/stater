@@ -43,7 +43,7 @@ function CsvParser(props) {
     setIs2Done(true);
   };
 
-  const { getRootProps, getRadioProps } = useRadioGroup({
+  const { getRadioProps } = useRadioGroup({
     name: "framework",
     defaultValue: "react",
     onChange: (event) => handleStepTwo(event),
