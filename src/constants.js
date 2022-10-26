@@ -113,3 +113,5 @@ export const playerFakeData = [
 ];
 
 export const generalDefensiveRate = 50;
+
+export const optionsForRadio = ["Touching", "Passing"];
